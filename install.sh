@@ -1,22 +1,21 @@
 #!/bin/bash
 
-echo -e "\e[1;36m󱔗 INITIALIZING BASH-HACKS MANUAL INSTALLATION...\e[0m"
+echo -e "\e[1;36m󱔗 installing it or something.. oops i accidentally wiped your drive sorry bro \e[0m"
 
-# create the target directory layout
+
 sudo mkdir -p /brc
 
-# copy everything over safely
-echo "-> transferring multitool binaries to /brc..."
+
+echo "adding the binaries. its unsafe and i dont give a fuck."
 sudo cp -r * /brc/
 sudo cp .rc /brc/ 2>/dev/null || true
 
-# fix the global script permissions instantly
 echo "-> executing internal uptools sequence..."
 sudo chmod +x /brc/*
 
-# inject setup code to .bashrc if it isn't already there
+
 if ! grep -q "THE MULTITOOL MOD" ~/.bashrc; then
-    echo "-> appending modular shell hooks to ~/.bashrc..."
+    echo "adding the like module checker thingy"
     cat << 'EOF' >> ~/.bashrc
 
 # THE MULTITOOL MOD
@@ -35,4 +34,4 @@ fi
 EOF
 fi
 
-echo -e "\e[1;32m✔ INSTALLATION COMPLETE. reload your terminal with 'source ~/.bashrc'!\e[0m"
+echo -e "\e[1;32m✔ done. do NOT ask for more shells. 'source ~/.bashrc'!\e[0m"
