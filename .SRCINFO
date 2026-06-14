@@ -1,0 +1,16 @@
+pkgbase = bash-tools-git
+	pkgdesc = multitools vibecoded while almost sleep
+	pkgver = 1.0.0
+	pkgrel = 1
+	url = https://github.com/theBashPerson/bash-tools
+	arch = any
+	license = GPL
+	makedepends = git
+	depends = bash
+	depends = fzf
+	provides = bash-tools
+	conflicts = bash-tools
+	source = bash-tools-git::git+https://github.com/theBashPerson/bash-tools.git
+	md5sums = SKIP
+
+pkgname = bash-tools-git

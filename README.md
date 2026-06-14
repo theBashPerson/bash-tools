@@ -24,3 +24,11 @@ cd bash-tools
 chmod +x install.sh
 ./install.sh
 ```
+
+if the PKGBUILD on the aur doesn't have the sha256sum of
+9bf2d5c9df3883756f002674f125ce9d564ef48baacf7cae53c7f92938a0d8c2  PKGBUILD
+(obtain said sum by running 
+```bash 
+sha256sum PKGBUILD
+```
+)
