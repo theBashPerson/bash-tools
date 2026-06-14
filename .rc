@@ -1,0 +1,32 @@
+# /brc/.rc
+
+export IN_DEV_ENV=1
+
+# shortcuts
+alias gs="git status"
+alias gd="git diff"
+alias gl="git log --oneline -n 10"
+alias gp="git push"
+alias gco="git checkout"
+DEV_ALIASES=("gs" "gd" "gl" "gp" "gco")
+
+# helper to extract branch names safely
+__parse_git_branch() {
+    git branch --show-current 2>/dev/null
+}
+
+# helper to check if git repository is dirty (uncommitted changes)
+__git_status_icon() {
+    if [[ -n $(git status --porcelain 2>/dev/null) ]]; then
+        echo -e " \[\e[1;31m\]󰊠\[\e[0m\]" # red warning node if modified files exist
+    else
+        echo -e " \[\e[1;32m\]✔\[\e[0m\]" # green validation check if clean
+    fi
+}
+
+export OLD_PS1="$PS1"
+
+# the fully riced nerd shebang:
+# 󱔗 [dev-env]  󰉋 \w  󱓎  (main) 󰊠 
+#  
+export PS1="\n\[\e[1;36m\]󱔗\[\e[0m\] \[\e[1;35m\][dev-env]\[\e[0m\] \[\e[1;34m\]󰉋 \w\[\e[0m\]\$(branch=\$(__parse_git_branch); [[ -n \$branch ]] && echo -e \" \[\e[1;33m\]󱓎 (\$branch)\$(\__git_status_icon)\[\e[0m\]\")\n\[\e[1;36m\]\[\e[0m\] "

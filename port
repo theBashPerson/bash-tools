@@ -1,0 +1,19 @@
+#!/bin/bash
+if [[ -z "$1" ]]; then
+    echo "usage: port [port_number]"
+    exit 1
+fi
+
+pid=$(ss -lptn "sport = :$1" 2>/dev/null | grep -oP 'pid=\K[0-9]+' | head -n 1)
+
+if [[ -n "$pid" ]]; then
+    proc_name=$(ps -p "$pid" -o comm=)
+    echo -e "\e[1;31m󰖂 port $1 locked by process: $proc_name (PID: $pid) 󰖂\e[0m"
+    read -p "terminate this process? (y/n): " confirm
+    if [[ "$confirm" == "y" ]]; then
+        kill -9 "$pid"
+        echo -e "\e[1;32m󰆴 process terminated.\e[0m"
+    fi
+else
+    echo -e "\e[1;32m󰲠 port $1 is completely free\e[0m"
+fi

@@ -1,0 +1,4 @@
+#!/bin/bash
+echo -e "\e[1;36m┌───󱔗 ACTIVE MULTITOOL UTILITIES ├────────────────┐\e[0m"
+ls -1 /brc | grep -v "^\." | sed 's/^/  🛠️  /'
+echo -e "\e[1;36m└───────────────────────────────────────────────┘\e[0m"

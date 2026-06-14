@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# ensure fzf is installed before running the menu
+if ! command -v fzf &>/dev/null; then
+    echo -e "\e[1;31m󰅚 fzf is required for this utility. installing...\e[0m"
+    sudo pacman -S fzf --noconfirm
+fi
+
+echo -e "\e[1;36m┌───󱔗 DEVELOPMENT COMPILER INITIALIZER ├────────────────┐\e[0m"
+
+# 1. select the primary language environment
+LANG_CHOICE=$(printf "C/C++\nJava\nLua" | fzf --prompt="󰘦 select development language: " --height=10 --layout=reverse --border)
+
+case "$LANG_CHOICE" in
+    "C/C++")
+        echo -e "\n\e[1;32m󰙺 configuring C/C++ environment (gcc, make, cmake, gdb)...\e[0m"
+        sudo pacman -S base-devel cmake gdb --needed --noconfirm
+        ;;
+
+    "Java")
+        # 2. select java environment type
+        JAVA_TYPE=$(printf "Normal (Standard Development)\nMinecraft Modding / Gameplay" | fzf --prompt="󰬊 select java profile: " --height=10 --layout=reverse --border)
+        
+        echo -e "\n\e[1;32m󰬊 installing major long-term support JDKs (8, 11, 17, 21)...\e[0m"
+        sudo pacman -S jdk8-openjdk jdk11-openjdk jdk17-openjdk jdk21-openjdk --needed --noconfirm
+        
+        if [[ "$JAVA_TYPE" == *"Minecraft"* ]]; then
+            # 3. select minecraft toolkit layers
+            MC_CHOICE=$(printf "Fabric (Modern / Lightweight)\nForge (Classic / Heavy)\nBoth Frameworks" | fzf --prompt="󰍳 select modding toolchains: " --height=10 --layout=reverse --border)
+            
+            echo -e "\n\e[1;32m󰍳 configuring minecraft modding dependencies (gradle)... \e[0m"
+            sudo pacman -S gradle --needed --noconfirm
+            
+            case "$MC_CHOICE" in
+                *"Fabric"*)
+                    echo -e "  󱔗 profile locked to: \e[1;35mfabric loader environment\e[0m"
+                    ;;
+                *"Forge"*)
+                    echo -e "  󱔗 profile locked to: \e[1;35mforge development kit\e[0m"
+                    ;;
+                *)
+                    echo -e "  󱔗 profile locked to: \e[1;35mhybrid fabric + forge workspace\e[0m"
+                    ;;
+            esac
+        fi
+        ;;
+
+    "Lua")
+        echo -e "\n\e[1;32m󰢱 configuring lua ecosystem (lua runtime + luarocks manager)...\e[0m"
+        sudo pacman -S lua luarocks --needed --noconfirm
+        ;;
+
+    *)
+        echo -e "\n\e[1;31m󰅚 initialization cancelled.\e[0m"
+        exit 0
+        ;;
+esac
+
+echo -e "\n\e[1;36m└────────────────────────────────────────────────────────┘\e[0m"

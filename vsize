@@ -1,0 +1,54 @@
+#!/bin/bash
+echo -e "\e[1;36m󰩨 is the dir full? let's see if $PWD is too much! 󰩨\e[0m\n"
+
+# helper function to convert raw bytes into human readable layout
+format_size() {
+    local bytes=$1
+    if (( bytes < 1024 )); then
+        echo "${bytes}B"
+    elif (( bytes < 1048576 )); then
+        echo "$(( (bytes + 512) / 1024 ))K"
+    elif (( bytes < 1073741824 )); then
+        echo "$(( (bytes + 524288) / 1048576 ))M"
+    else
+        echo "$(( (bytes + 536870912) / 1073741824 ))G"
+    fi
+}
+
+# temporary arrays for holding data
+declare -A raw_sizes
+declare -a paths
+
+# loop through everything in the current directory (including hidden files, minus . and ..)
+for item in * .[^.]* ..?*; do
+    # guard against unmatched glob patterns
+    [[ -e "$item" ]] || continue
+
+    if [[ -d "$item" ]]; then
+        # for directories, manually sum up the sizes of all contained files
+        # find -type f prints byte sizes, awk sums them up
+        bytes=$(find "$item" -type f -exec stat -c%s {} + 2>/dev/null | awk '{s+=$1} END {print s+0}')
+    else
+        # for regular files, grab the byte size instantly
+        bytes=$(stat -c%s "$item" 2>/dev/null || echo 0)
+    fi
+
+    raw_sizes["$item"]=$bytes
+    paths+=("$item")
+done
+
+# sort the items by their raw byte size numeric value
+sorted_paths=$(for p in "${paths[@]}"; do echo "$p|${raw_sizes[$p]}"; done | sort -t'|' -k2 -rn | head -n 10)
+
+# print the riced output layout
+echo "$sorted_paths" | while IFS='|' read -r item bytes; do
+    [[ -z "$item" ]] && continue
+    
+    human_size=$(format_size "$bytes")
+    
+    if [[ -d "$item" ]]; then
+        echo -e "  \e[1;34m󰉋 $human_size\e[0m\t$item/"
+    else
+        echo -e "  \e[1;32m󰈔 $human_size\e[0m\t$item"
+    fi
+done
