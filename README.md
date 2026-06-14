@@ -9,15 +9,18 @@ find it out urself bozo
 
 ## installation tracks
 
-### 1. the lazy track (aur style)
-clone down the tracking recipe layout and run the engine:
+### 1. the way i plan to use it
+clone it and make a pkg
 ```bash
 git clone [https://github.com/theBashPerson/bash-tools.git](https://github.com/theBashPerson/bash-tools.git)
 cd bash-tools
-makepkg -si 
+makepkg -si
+```
 ##
+the manual sh way
 ```bash
 git clone [https://github.com/theBashPerson/bash-tools.git](https://github.com/theBashPerson/bash-tools.git)
 cd bash-tools
 chmod +x install.sh
-./install.sh 
+./install.sh
+```
