@@ -35,3 +35,14 @@ EOF
 fi
 
 echo -e "\e[1;32m✔ done. do NOT ask for more shells. 'source ~/.bashrc'!\e[0m"
+# fucking
+
+check_deps() {
+    local deps=(fzf git gpg)
+    for dep in "${deps[@]}"; do
+        if ! command -v "$dep" &>/dev/null; then
+            echo "$dep missing, installing..."
+            sudo pacman -S --needed --noconfirm "$dep"
+        fi
+    done
+}
