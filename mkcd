@@ -1,0 +1,9 @@
+#!/bin/bash
+# mkcd — make dir and immediately drop into it
+if [[ -z "$1" ]]; then
+    echo -e "\e[1;31m󰅚 usage: mkcd <directory>\e[0m"
+    exit 1
+fi
+
+mkdir -p "$1" && cd "$1" && \
+    echo -e "\e[1;32m󰝰 spawned and entered: \e[1;37m$(pwd)\e[0m"

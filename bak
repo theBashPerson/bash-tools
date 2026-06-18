@@ -1,0 +1,16 @@
+#!/bin/bash
+# bak — slap a timestamp on it and call it a day
+if [[ -z "$1" ]]; then
+    echo -e "\e[1;31m󰅚 usage: bak <file>\e[0m"
+    exit 1
+fi
+
+if [[ ! -e "$1" ]]; then
+    echo -e "\e[1;31m󰅚 '$1' doesn't exist, bro\e[0m"
+    exit 1
+fi
+
+stamp=$(date +%Y%m%d_%H%M%S)
+dest="${1}.bak.${stamp}"
+cp -r "$1" "$dest"
+echo -e "\e[1;32m󰄬 backed up: \e[1;37m$1\e[0m \e[1;36m→ \e[1;37m$dest\e[0m"

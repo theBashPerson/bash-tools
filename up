@@ -1,0 +1,19 @@
+#!/bin/bash
+# up — nuke everything outdated. go.
+echo -e "\e[1;36m󰚰 initiating full system upgrade sequence...\e[0m\n"
+
+if command -v yay &>/dev/null; then
+    echo -e "\e[1;35m󰣇 yay detected — upgrading aur + official repos...\e[0m"
+    yay -Syu --noconfirm
+elif command -v paru &>/dev/null; then
+    echo -e "\e[1;35m󰣇 paru detected — upgrading aur + official repos...\e[0m"
+    paru -Syu --noconfirm
+elif command -v pacman &>/dev/null; then
+    echo -e "\e[1;33m󰣇 no aur helper found. running raw pacman...\e[0m"
+    sudo pacman -Syu --noconfirm
+else
+    echo -e "\e[1;31m󰅚 no recognized package manager found. are you even on arch?\e[0m"
+    exit 1
+fi
+
+echo -e "\n\e[1;32m󰄬 system fully upgraded. you are now 0.3% faster.\e[0m"

@@ -1,0 +1,145 @@
+#!/bin/bash
+# passgen — secure password generator with TUI, clipboard + file output
+command -v fzf &>/dev/null || { echo -e "\e[1;31m󰅚 fzf required\e[0m"; exit 1; }
+
+# ── defaults ──────────────────────────────────────────────
+DEFAULT_LEN=24
+CHARSET_LOWER="abcdefghijklmnopqrstuvwxyz"
+CHARSET_UPPER="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+CHARSET_DIGITS="0123456789"
+CHARSET_SYMS='!@#$%^&*()-_=+[]{}|;:,.<>?'
+
+# ── helpers ───────────────────────────────────────────────
+_copy_to_clipboard() {
+    if command -v wl-copy &>/dev/null; then
+        echo -n "$1" | wl-copy && return 0
+    fi
+    if command -v xclip &>/dev/null; then
+        echo -n "$1" | xclip -selection clipboard && return 0
+    fi
+    if command -v xsel &>/dev/null; then
+        echo -n "$1" | xsel --clipboard --input && return 0
+    fi
+    return 1
+}
+
+_strength_bar() {
+    local len=$1 syms=$2
+    local score=0
+    (( len >= 12 ))  && (( score++ ))
+    (( len >= 20 ))  && (( score++ ))
+    (( len >= 32 ))  && (( score++ ))
+    [[ "$syms" == "1" ]] && (( score++ ))
+
+    case $score in
+        0|1) echo -e "\e[1;31m██░░░░░░░  WEAK\e[0m" ;;
+        2)   echo -e "\e[1;33m████░░░░░  FAIR\e[0m" ;;
+        3)   echo -e "\e[1;32m███████░░  STRONG\e[0m" ;;
+        4)   echo -e "\e[1;36m█████████  INSANE\e[0m" ;;
+    esac
+}
+
+_gen_pass() {
+    local len=$1 use_syms=$2
+    local pool="${CHARSET_LOWER}${CHARSET_UPPER}${CHARSET_DIGITS}"
+    [[ "$use_syms" == "1" ]] && pool+="$CHARSET_SYMS"
+    LC_ALL=C tr -dc "$pool" < /dev/urandom | head -c "$len"
+}
+
+# ── TUI ───────────────────────────────────────────────────
+echo -e "\e[1;36m┌───  PASSGEN — SECURE PASSWORD GENERATOR ├─────────────┐\e[0m"
+echo ""
+
+# length picker via fzf
+len=$(printf '8\n12\n16\n20\n24\n32\n48\n64\ncustom' | \
+    fzf --prompt="  password length: " \
+        --height=15 \
+        --layout=reverse \
+        --border \
+        --header="select a length (or 'custom')")
+
+[[ -z "$len" ]] && { echo -e "\e[1;33m󰜺 cancelled\e[0m"; exit 0; }
+
+if [[ "$len" == "custom" ]]; then
+    read -rp "$(echo -e "\e[1;36m  enter custom length: \e[0m")" len
+    if ! [[ "$len" =~ ^[0-9]+$ ]] || (( len < 4 )); then
+        echo -e "\e[1;31m󰅚 invalid length. minimum is 4.\e[0m"; exit 1
+    fi
+fi
+
+# symbol toggle
+echo ""
+use_syms=$(printf 'yes\nno' | \
+    fzf --prompt="  include symbols (!@#\$%...): " \
+        --height=8 \
+        --layout=reverse \
+        --border)
+
+[[ -z "$use_syms" ]] && { echo -e "\e[1;33m󰜺 cancelled\e[0m"; exit 0; }
+[[ "$use_syms" == "yes" ]] && sym_flag=1 || sym_flag=0
+
+# how many to generate
+echo ""
+count=$(printf '1\n3\n5\n10' | \
+    fzf --prompt="  how many passwords: " \
+        --height=10 \
+        --layout=reverse \
+        --border)
+
+[[ -z "$count" ]] && count=1
+
+echo ""
+echo -e "\e[1;36m┌───  GENERATED PASSWORDS  ├───────────────────────────────┐\e[0m"
+passwords=()
+for (( i=0; i<count; i++ )); do
+    p=$(_gen_pass "$len" "$sym_flag")
+    passwords+=("$p")
+    echo -e "  \e[1;37m$p\e[0m"
+done
+echo -e "\e[1;36m└──────────────────────────────────────────────────────────┘\e[0m"
+echo ""
+echo -e "  strength: $(_strength_bar "$len" "$sym_flag")"
+echo ""
+
+# output options
+action=$(printf 'copy first to clipboard\nsave all to file\nboth\njust print (done)' | \
+    fzf --prompt="  what do with it: " \
+        --height=10 \
+        --layout=reverse \
+        --border)
+
+case "$action" in
+    "copy first to clipboard")
+        if _copy_to_clipboard "${passwords[0]}"; then
+            echo -e "\e[1;32m󰄬 copied to clipboard\e[0m"
+        else
+            echo -e "\e[1;31m󰅚 no clipboard tool found (install wl-copy, xclip, or xsel)\e[0m"
+        fi
+        ;;
+    "save all to file")
+        read -rp "$(echo -e "\e[1;36m  save to (path): \e[0m")" outfile
+        outfile="${outfile:-passwords.txt}"
+        for p in "${passwords[@]}"; do
+            echo "$p" >> "$outfile"
+        done
+        echo -e "\e[1;32m󰄬 saved $count password(s) to: \e[1;37m$outfile\e[0m"
+        ;;
+    "both")
+        if _copy_to_clipboard "${passwords[0]}"; then
+            echo -e "\e[1;32m󰄬 first password copied to clipboard\e[0m"
+        else
+            echo -e "\e[1;31m󰅚 clipboard copy failed\e[0m"
+        fi
+        read -rp "$(echo -e "\e[1;36m  save to (path): \e[0m")" outfile
+        outfile="${outfile:-passwords.txt}"
+        for p in "${passwords[@]}"; do
+            echo "$p" >> "$outfile"
+        done
+        echo -e "\e[1;32m󰄬 saved to: \e[1;37m$outfile\e[0m"
+        ;;
+    *)
+        echo -e "\e[1;36m done.\e[0m"
+        ;;
+esac
+
+echo -e "\e[1;36m└───────────────────────────────────────────────────────────┘\e[0m"

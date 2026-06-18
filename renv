@@ -1,0 +1,21 @@
+#!/bin/bash
+# renv — reload shell environment config without starting a new shell
+echo -e "\e[1;36m󰑓 reloading shell environment...\e[0m"
+
+configs=(
+    "$HOME/.bashrc"
+    "$HOME/.bash_profile"
+    "$HOME/.profile"
+    "/brc/.rc"
+)
+
+for f in "${configs[@]}"; do
+    if [[ -f "$f" ]]; then
+        # shellcheck disable=SC1090
+        source "$f" 2>/dev/null && \
+            echo -e "  \e[1;32m󰄬 sourced: \e[1;37m$f\e[0m" || \
+            echo -e "  \e[1;31m󰅚 failed:  \e[1;37m$f\e[0m"
+    fi
+done
+
+echo -e "\n\e[1;32m󰌑 env reloaded. new aliases/functions now active.\e[0m"

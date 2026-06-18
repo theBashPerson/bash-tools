@@ -1,4 +1,34 @@
 #!/bin/bash
-echo -e "\e[1;36m┌───󱔗 ACTIVE MULTITOOL UTILITIES ├────────────────┐\e[0m"
-ls -1 /brc | grep -v "^\." | sed 's/^/  🛠️  /'
-echo -e "\e[1;36m└───────────────────────────────────────────────┘\e[0m"
+# modules — list active multitool utilities with descriptions
+declare -A _desc=(
+    [bak]="timestamp backup a file"
+    [cdp]="smart cd — go up N levels or to ancestor"
+    [devinit]="fzf dev compiler environment setup"
+    [extract]="universal archive extractor"
+    [fkill]="fuzzy process picker + killer"
+    [hgrep]="highlighted grep with context"
+    [mkcd]="mkdir and cd in one shot"
+    [modules]="this right here"
+    [passgen]="TUI secure password generator"
+    [port]="find + kill what's on a port"
+    [renv]="reload shell environment in-place"
+    [rmrf]="interactive recursive delete + preview"
+    [up]="upgrade everything (yay/paru/pacman)"
+    [vsize]="visual directory size breakdown"
+    [wtf]="what is that command, actually"
+)
+
+echo -e "\e[1;36m┌───󱔗 ACTIVE MULTITOOL UTILITIES ─────────────────────────────┐\e[0m"
+echo ""
+
+for tool in $(ls /brc | grep -v '^\.' | grep -v '\.sh$' | sort); do
+    desc="${_desc[$tool]:-}"
+    if [[ -n "$desc" ]]; then
+        printf "  \e[1;35m%-12s\e[0m \e[1;36m│\e[0m \e[1;37m%s\e[0m\n" "$tool" "$desc"
+    else
+        printf "  \e[1;35m%-12s\e[0m\n" "$tool"
+    fi
+done
+
+echo ""
+echo -e "\e[1;36m└──────────────────────────────────────────────────────────────┘\e[0m"
